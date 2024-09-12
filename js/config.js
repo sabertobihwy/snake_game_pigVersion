@@ -40,10 +40,14 @@ var snake = {
     dir: dirs.right,
     isCollide: false,
     getFood: false
-
 }
 
 var container = document.querySelector('.container')
 var foodPos = {
     x: 0, y: 0, dom: "", pic: ""
 }
+var score = 0;
+var timer = null
+var replaybtnDom = document.querySelector('.replaybtn')
+var startbtn = document.querySelector('.startbtn')
+var addPos = null

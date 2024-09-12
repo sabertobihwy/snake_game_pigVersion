@@ -1,7 +1,10 @@
-function main() {
+
+
+function start() {
     initMap()
     drawSnake()
     drawFood()
+    timer = timerFN()
 }
 
 function initMap() {
@@ -106,9 +109,17 @@ function isCollide() {
 
     // 3. getFood?
     if (newHead.x === foodPos.x && newHead.y === foodPos.y) {
+        score++;
         snake.getFood = true
     }
     return newHead
+}
+
+function removeAll() {
+    snake.snakePos.forEach((p) => {
+        container.removeChild(p.dom)
+    })
+    container.removeChild(foodPos.dom)
 }
 
 function moveSnake() {
@@ -119,47 +130,117 @@ function moveSnake() {
     // getfood -> change food pos 
     if (snake.isCollide) {
         console.log('collide')
+        if (window.confirm(`Restart? Your score is ${score}`)) {
+            removeAll()
+            snake = {
+                snakePos: [
+                    { x: 0, y: 0, dom: "", flag: 'body' },
+                    { x: 1, y: 0, dom: "", flag: 'body' },
+                    { x: 2, y: 0, dom: "", flag: 'body' },
+                    { x: 3, y: 0, dom: "", flag: 'head' }
+                ],
+                dir: dirs.right,
+                isCollide: false,
+                getFood: false
+            }
+            foodPos = {
+                x: 0, y: 0, dom: "", pic: ""
+            }
+            score = 0;
+            drawSnake()
+            drawFood()
+        } else {
+            document.onkeydown = null
+            clearInterval(timer)
+        }
         return
     }
 
     if (snake.getFood) {
+        addPos = { x: foodPos.x, y: foodPos.y }
+        //  console.log("get food -> " + addPos)
         drawFood()
     }
 
     // 2. change snake pos 
     // 2.1 body
     snake.snakePos[snake.snakePos.length - 1].flag = 'body'
-    var tail = snake.snakePos.shift() // remove the tail
-    container.removeChild(tail.dom)
+    var tail = snake.snakePos[0]
+    if (addPos == null || ((addPos.x !== tail.x) || (addPos.y !== tail.y))) {
+        var tail = snake.snakePos.shift() // remove the tail
+        container.removeChild(tail.dom)
+        console.log(1)
+    } else {
+        addPos = null
+        console.log(2)
+    }
+
     // 2.2  head 
     snake.snakePos.push(newHead)
 
     // 3. draw the dom 
     drawSnake()
 
-}
-
-document.onkeydown = function (e) {
-    switch (e.key) {
-        case 'ArrowUp':
-            snake.dir = dirs.up
-            break
-        case 'ArrowDown':
-            snake.dir = dirs.down
-            break
-        case 'ArrowLeft':
-            snake.dir = dirs.left
-            break
-        case 'ArrowRight':
-            snake.dir = dirs.right
-            break
-    }
-    moveSnake()
+    // 4. restore snake state
     snake.isCollide = false;
     snake.getFood = false
+}
+
+function onkeydownFN(e) {
+    switch (e.key) {
+        case 'ArrowUp':
+            if (snake.dir.flag !== 'down') {
+                snake.dir = dirs.up
+            }
+            break
+        case 'ArrowDown':
+            if (snake.dir.flag !== 'up') {
+                snake.dir = dirs.down
+            }
+            break
+        case 'ArrowLeft':
+            if (snake.dir.flag !== 'right') {
+                snake.dir = dirs.left
+            }
+            break
+        case 'ArrowRight':
+            if (snake.dir.flag !== 'left') {
+                snake.dir = dirs.right
+            }
+            break
+    }
+}
+
+function timerFN() {
+    return setInterval(function () {
+        moveSnake()
+    }, 100)
+}
+
+function bindEvent() {
+    startbtn.addEventListener('click', function (event) {
+        startbtn.style.display = 'none'
+        start()
+        event.stopPropagation();
+        document.onkeydown = function (e) {
+            onkeydownFN(e)
+        }
+        document.onclick = function () {
+            replaybtnDom.style.display = 'block'
+            document.onkeydown = null
+            clearInterval(timer)
+        }
+        replaybtnDom.onclick = function (event) {
+            document.onkeydown = function (e) {
+                onkeydownFN(e)
+            }
+            replaybtnDom.style.display = 'none'
+            event.stopPropagation();
+            timer = timerFN()
+        }
+    })
 
 }
 
+bindEvent()
 
-
-main()

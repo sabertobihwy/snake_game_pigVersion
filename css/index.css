@@ -20,16 +20,21 @@
     outline: none;
 }
 
+.replaybtn:hover {
+    cursor: grab;
+}
+
 .replaybtn {
     height: 150px;
     width: 150px;
     background: url("../img/replay.png") center/contain no-repeat;
     display: none;
+    z-index: 9;
 }
 
 .startbtn {
     height: 150px;
     width: 150px;
     background: url("../img/start.png") center/contain no-repeat;
-    display: none;
+    display: block;
 }
